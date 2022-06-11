@@ -1,6 +1,4 @@
 rgo*.json
-./go.mod
-./go.sum
 log/*
 *.log
 
