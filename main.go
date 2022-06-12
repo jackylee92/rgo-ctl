@@ -46,6 +46,7 @@ func start() (err error) {
 	fmt.Println("    go 版本:" +cfg.version)
 	fmt.Println("    go Mod:" + cfg.module )
 	fmt.Println("    项目名:" + cfg.name)
+	fmt.Println("    Git:" + cfg.git)
 	err = cfg.mv()
 	return err
 }
