@@ -263,7 +263,7 @@ func (cfg *config) checkContent() (err error) {
 			if item == "go.mod" {
 				hasMod = true
 			}
-			return errors.New(cfg.projectPath + "不为空")
+			return errors.New(cfg.projectPath + "不为空" + item)
 		}
 	}
 	if !hasMod {
