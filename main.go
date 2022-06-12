@@ -9,6 +9,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"sort"
 	"strings"
 )
 
@@ -17,16 +18,19 @@ type config struct {
 	git         string
 	projectPath string
 	sysType     string
-	version string
-	module string
+	version     string
+	module      string
+}
+
+var allowFiles = []string{
+	"readme.md",
+	"readme",
 }
 
 func main() {
 	if err := start(); err != nil {
 		fmt.Fprintln(os.Stderr, err.Error())
 		os.Exit(1)
-	}else{
-		fmt.Println("    项目创建完成。。。")
 	}
 }
 
@@ -44,11 +48,14 @@ func start() (err error) {
 	}
 	fmt.Println("项目创建中: ")
 	fmt.Println("    系统:" + cfg.sysType)
-	fmt.Println("    go 版本:" +cfg.version)
-	fmt.Println("    go Mod:" + cfg.module )
+	fmt.Println("    go 版本:" + cfg.version)
+	fmt.Println("    go Mod:" + cfg.module)
 	fmt.Println("    项目名:" + cfg.name)
 	fmt.Println("    Git:" + cfg.git)
 	err = cfg.mv()
+	if err == nil {
+		fmt.Println("    项目创建完成。。。")
+	}
 	return err
 }
 
@@ -234,12 +241,21 @@ func (cfg *config) checkContent() (err error) {
 	}
 	cfg.git = gitPathTmp[4:]
 	files := make([]string, 0)
-	err = filepath.Walk(cfg.projectPath, func(path string, info os.FileInfo, err error) error {
-		files = append(files, info.Name())
-		return nil
-	})
+
+
+
+	f, err := os.Open(cfg.projectPath)
 	if err != nil {
-		return errors.New("取" + cfg.projectPath + "内容失败")
+		return err
+	}
+	dirs, err := f.ReadDir(-1)
+	f.Close()
+	if err != nil {
+		return err
+	}
+	sort.Slice(dirs, func(i, j int) bool { return dirs[i].Name() < dirs[j].Name() })
+	for _, item := range dirs {
+		files = append(files, item.Name())
 	}
 	hasMod := false
 	if len(files) == 1 {
@@ -250,6 +266,7 @@ func (cfg *config) checkContent() (err error) {
 		command.Dir = cfg.projectPath
 		command.Run()
 	} else {
+	OuterLoop:
 		for key, item := range files {
 			if key == 0 {
 				continue
@@ -257,8 +274,11 @@ func (cfg *config) checkContent() (err error) {
 			if item[0:1] == "." {
 				continue
 			}
-			if strings.ToLower(item) == "readme.md" {
-				continue
+			fileName := strings.ToLower(item)
+			for _, allowFileName := range allowFiles {
+				if fileName == allowFileName {
+					continue OuterLoop
+				}
 			}
 			if item == "go.mod" {
 				hasMod = true
@@ -320,7 +340,7 @@ func copy(project, from, to string) error {
 			return e
 		}
 		defer out.Close()
-		_ , e = out.WriteString(newFileContent)
+		_, e = out.WriteString(newFileContent)
 	}
 	return e
 }
