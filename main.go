@@ -25,8 +25,9 @@ func main() {
 	if err := start(); err != nil {
 		fmt.Fprintln(os.Stderr, err.Error())
 		os.Exit(1)
+	}else{
+		fmt.Println("    项目创建完成。。。")
 	}
-	fmt.Println("    项目创建完成。。。")
 }
 
 func start() (err error) {
