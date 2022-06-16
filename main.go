@@ -98,9 +98,9 @@ func validate(cfg *config) (err error) {
 		return err
 	}
 	// <LiJunDong : 2022-06-11 15:21:23> --- 必须在rgo.com目录下面
-	//if err := cfg.checkDir(); err != nil {
-	//	return err
-	//}
+	if err := cfg.checkDir(); err != nil {
+		return err
+	}
 	// <LiJunDong : 2022-06-11 15:22:46> --- 项目文件夹是否存在，是否已存在内容
 	if err := cfg.checkContent(); err != nil {
 		return err
@@ -130,9 +130,9 @@ func (cfg *config) clone() (err error) {
 // @Time    : 2022-06-11
 func (cfg *config) mv() (err error) {
 	from := "./util/rgtemplate/code"
-	if cfg.sysType == "windows" {
-		from = "\\util\\rgtemplate\\code"
-	}
+	//if cfg.sysType == "windows" {
+	//	from = "\\util\\rgtemplate\\code"
+	//}
 	err = copy(cfg.name, from, cfg.projectPath)
 	if err != nil {
 		return errors.New("移动模版文件失败，" + err.Error())
@@ -170,12 +170,48 @@ func (cfg *config) checkEnv() (err error) {
 	}
 	//  <LiJunDong : 2022-06-11 15:57:19> --- go module
 	gomod := os.Getenv("GO111MODULE")
+	if cfg.sysType == "windows" {
+		gomod, err = getWinMod()
+		if err != nil {
+			return err
+		}
+	}
 	cfg.module = gomod
 	gomod = strings.ToLower(gomod)
 	if gomod != "auto" && gomod != "on" {
 		return errors.New("go环境未开启go mod，需要auto/on")
 	}
 	return err
+}
+
+func getWinMod() (mod string, err error){
+	command := exec.Command("go", "env")
+	outBt, err := command.Output()
+	if err != nil {
+		return mod, errors.New("获取Windows go env 数据失败，" + err.Error())
+	}
+	err = command.Run()
+	goEnvStr := string(outBt)
+	goEnvArr := strings.Split(goEnvStr, "\n")
+	goEnvMap := make(map[string]string,0)
+	// 可以获取所有的go配置，方便以后备用
+	for _, item := range goEnvArr {
+		if item == "" {
+			continue
+		}
+		cutEndIndex := strings.Index(item, "=")
+		if cutEndIndex == 0 {
+			continue
+		}
+		envField := item[4:cutEndIndex]
+		envValue := item[cutEndIndex+1:]
+		goEnvMap[envField] = envValue
+	}
+	mod, ok := goEnvMap["GO111MODULE"]
+	if !ok {
+		return mod, errors.New("go env中未查询到GO111MODULE配置")
+	}
+	return mod, nil
 }
 
 // checkDir
@@ -242,11 +278,9 @@ func (cfg *config) checkContent() (err error) {
 	cfg.git = gitPathTmp[4:]
 	files := make([]string, 0)
 
-
-
 	f, err := os.Open(cfg.projectPath)
 	if err != nil {
-		return err
+		return errors.New("打开" + cfg.projectPath + "失败，" + err.Error())
 	}
 	dirs, err := f.ReadDir(-1)
 	f.Close()
@@ -259,12 +293,12 @@ func (cfg *config) checkContent() (err error) {
 	}
 	hasMod := false
 	if len(files) == 1 {
-		command := exec.Command("git clone " + cfg.git + " ./")
-		command.Dir = cfg.projectPath
-		command.Run()
-		command = exec.Command("go mod init")
-		command.Dir = cfg.projectPath
-		command.Run()
+		command1 := exec.Command("git clone " + cfg.git + " ./")
+		command1.Dir = cfg.projectPath
+		command1.Run()
+		command2 := exec.Command("go mod init")
+		command2.Dir = cfg.projectPath
+		command2.Run()
 	} else {
 	OuterLoop:
 		for key, item := range files {
@@ -287,11 +321,12 @@ func (cfg *config) checkContent() (err error) {
 		}
 	}
 	if !hasMod {
-		command := exec.Command("go", "mod", "init")
+		//command := exec.Command("go", "mod", "init")
+		command := exec.Command("go", "mod", "init", "rgo.com/app/" + cfg.name)
 		command.Dir = cfg.projectPath
 		err = command.Run()
 		if err != nil {
-			return err
+			return errors.New("执行go mod init失败，" + err.Error() + "，路径"+cfg.projectPath)
 		}
 	}
 	return err
