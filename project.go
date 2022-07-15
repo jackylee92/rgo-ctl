@@ -45,7 +45,7 @@ func (c *projectTool)check()(err error){
 }
 
 func (c *projectTool)clone() (err error){
-	command := exec.Command("git clone " + rgoTemplateUrl + " ./")
+	command := exec.Command("git clone " + rgoTemplateUrl + " " + c.pwd)
 	command.Dir = c.pwd
 	err = command.Run()
 	return err
