@@ -61,7 +61,11 @@ func (c *projectTool)replaceName(path string) (err error) {
 	if f.IsDir() {
 		if list, err := ioutil.ReadDir(path); err == nil {
 			for _, item := range list {
-				if err = c.replaceName(filepath.Join(path, item.Name())); err != nil {
+				name := item.Name()
+				if strings.Index(name, ".") == 0 {
+					continue
+				}
+				if err = c.replaceName(filepath.Join(path, name)); err != nil {
 					return err
 				}
 			}
