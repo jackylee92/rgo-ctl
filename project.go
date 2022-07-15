@@ -3,6 +3,7 @@ package main
 import (
 	"io"
 	"io/ioutil"
+	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -29,6 +30,7 @@ func (c *projectTool)create() (err error) {
 		return err
 	}
 	if err = c.replaceName(c.pwd); err != nil {
+		log.Println("err", err)
 		return err
 	}
 	return err
@@ -52,15 +54,15 @@ func (c *projectTool)clone() (err error){
 }
 
 func (c *projectTool)replaceName(path string) (err error) {
-	f, e := os.Stat(path)
-	if e != nil {
-		return e
+	f, err := os.Stat(path)
+	if err != nil {
+		return err
 	}
 	if f.IsDir() {
-		if list, err := ioutil.ReadDir(path); e == nil {
+		if list, err := ioutil.ReadDir(path); err == nil {
 			for _, item := range list {
 				if err = c.replaceName(filepath.Join(path, item.Name())); err != nil {
-					return e
+					return err
 				}
 			}
 		}
@@ -70,7 +72,7 @@ func (c *projectTool)replaceName(path string) (err error) {
 			return err
 		}
 	}
-	return e
+	return err
 }
 
 func (c *projectTool)replaceOne(fileName string) (err error) {
