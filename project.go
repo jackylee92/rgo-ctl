@@ -115,7 +115,8 @@ func (c *projectTool)getNewFile(fileName string) (content []byte, err error) {
 	if err != nil {
 		return content, err
 	}
-	return content, err
+	newBody := strings.Replace(string(content), "rgo-template", c.name, -1)
+	return []byte(newBody), err
 }
 
 func (c *projectTool)writeToFile(filePath string, outPut []byte) error {
