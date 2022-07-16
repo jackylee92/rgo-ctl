@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
@@ -26,13 +27,16 @@ func (c *projectTool)create() (err error) {
 	if err = c.check(); err != nil {
 		return err
 	}
+	fmt.Println("验证成功...")
 	if err = c.clone(); err != nil {
 		return err
 	}
+	fmt.Println("clone成功...")
 	if err = c.replaceName(c.pwd); err != nil {
 		log.Println("err", err)
 		return err
 	}
+	fmt.Println("初始化成功...")
 	return err
 }
 
