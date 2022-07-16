@@ -54,16 +54,16 @@ func (c *projectTool)check()(err error){
 
 func (c *projectTool)clone() (err error){
 	command := exec.Command("git", "clone", rgoTemplateUrl, c.pwd)
-	fmt.Println("准备clone>")
+	fmt.Println("准备clone>", "git clone " + rgoTemplateUrl + " " + c.pwd)
 	command.Dir = c.pwd
-	fmt.Println("准备clone>>")
+	fmt.Println("准备clone>>", "git clone " + rgoTemplateUrl + " " + c.pwd)
 	err = command.Run()
-	fmt.Println("准备clone>>>")
+	fmt.Println("准备clone>>>", "git clone " + rgoTemplateUrl + " " + c.pwd)
 	if err == nil {
-		fmt.Println("准备clone>>>>")
+		fmt.Println("准备clone>>>>", "git clone " + rgoTemplateUrl + " " + c.pwd)
 		_ = command.Wait()
 	}
-	fmt.Println("准备clone>>>>>")
+	fmt.Println("准备clone>>>>>", "git clone " + rgoTemplateUrl + " " + c.pwd)
 	time.Sleep(20*time.Second)
 	return errors.New("git clone失败：" + err.Error())
 }
