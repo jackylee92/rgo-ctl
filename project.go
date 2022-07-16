@@ -10,6 +10,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"time"
 )
 
 /*
@@ -63,6 +64,7 @@ func (c *projectTool)clone() (err error){
 		_ = command.Wait()
 	}
 	fmt.Println("准备clone>>>>>")
+	time.Sleep(20*time.Second)
 	return errors.New("git clone失败：" + err.Error())
 }
 
