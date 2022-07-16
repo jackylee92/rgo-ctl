@@ -10,7 +10,6 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
-	"time"
 )
 
 /*
@@ -53,19 +52,22 @@ func (c *projectTool)check()(err error){
 }
 
 func (c *projectTool)clone() (err error){
-	command := exec.Command("git", "clone", rgoTemplateUrl, c.pwd)
-	fmt.Println("准备clone>", "git clone " + rgoTemplateUrl + " " + c.pwd)
-	command.Dir = c.pwd
-	fmt.Println("准备clone>>", "git clone " + rgoTemplateUrl + " " + c.pwd)
-	err = command.Run()
-	fmt.Println("准备clone>>>", "git clone " + rgoTemplateUrl + " " + c.pwd)
-	if err == nil {
-		fmt.Println("准备clone>>>>", "git clone " + rgoTemplateUrl + " " + c.pwd)
-		_ = command.Wait()
+	command1 := exec.Command("rm", "-rf", c.pwd + ".*")
+	command1.Dir = c.pwd
+	err = command1.Run()
+	if err != nil {
+		return err
 	}
-	fmt.Println("准备clone>>>>>", "git clone " + rgoTemplateUrl + " " + c.pwd)
-	time.Sleep(20*time.Second)
-	return errors.New("git clone失败：" + err.Error())
+	command1.Wait()
+
+	command2 := exec.Command("git", "clone", rgoTemplateUrl, c.pwd)
+	command2.Dir = c.pwd
+	err = command2.Run()
+	if err != nil {
+		return errors.New("git clone失败：" + err.Error())
+	}
+	command2.Wait()
+	return err
 }
 
 func (c *projectTool)replaceName(path string) (err error) {
