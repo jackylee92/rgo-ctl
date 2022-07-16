@@ -23,10 +23,12 @@ var allowFiles = []string{
 }
 
 func main() {
-	if err := start(); err != nil {
+	 err := start()
+	if err != nil {
 		fmt.Fprintln(os.Stderr, err.Error())
 		os.Exit(1)
 	}
+	fmt.Println("初始化结束：", err)
 }
 
 func start() (err error) {
