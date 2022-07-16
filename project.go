@@ -59,9 +59,10 @@ func (c *projectTool)clone() (err error){
 	err = command.Run()
 	fmt.Println("准备clone>>>")
 	if err == nil {
+		fmt.Println("准备clone>>>>")
 		_ = command.Wait()
 	}
-	fmt.Println("准备clone>>>>")
+	fmt.Println("准备clone>>>>>")
 	return errors.New("git clone失败：" + err.Error())
 }
 
