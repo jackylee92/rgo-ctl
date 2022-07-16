@@ -83,7 +83,7 @@ func parseConfig(args []string) (*config, error) {
 
 func (cfg *config) switchDo() (err error) {
 	switch cfg.action {
-	case "initProject": // 初始化项目
+	case "init": // 初始化项目
 		client := projectTool{*cfg}
 		if err = client.create(); err != nil {
 			return err
