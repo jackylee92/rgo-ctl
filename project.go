@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -54,7 +55,10 @@ func (c *projectTool)clone() (err error){
 	command := exec.Command("git", "clone", rgoTemplateUrl, c.pwd)
 	command.Dir = c.pwd
 	err = command.Run()
-	return err
+	if err == nil {
+		_ = command.Wait()
+	}
+	return errors.New("git clone失败：" + err.Error())
 }
 
 func (c *projectTool)replaceName(path string) (err error) {
