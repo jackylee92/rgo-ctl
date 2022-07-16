@@ -1,9 +1,9 @@
 package main
 
 import (
+	"bufio"
 	"errors"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"log"
 	"os"
@@ -88,7 +88,7 @@ func (c *projectTool)replaceName(path string) (err error) {
 			}
 		}
 	} else {
-		err = c.replaceOne(path)
+		err = c.replaceFile(path)
 		if err != nil {
 			return err
 		}
@@ -96,20 +96,39 @@ func (c *projectTool)replaceName(path string) (err error) {
 	return err
 }
 
-func (c *projectTool)replaceOne(fileName string) (err error) {
+
+func (c *projectTool)replaceFile(fileName string)(err error){
+	content, err := c.getNewFile(fileName)
+	if err != nil {
+		return err
+	}
+	err = c.writeToFile(fileName, content)
+	return err
+}
+func (c *projectTool)getNewFile(fileName string) (content []byte, err error) {
 	f, err := os.OpenFile(fileName, os.O_CREATE|os.O_RDWR, os.ModePerm)
 	if err != nil {
-		return err
+		return content, err
 	}
 	defer f.Close()
-	body, err := ioutil.ReadAll(f)
+	content, err = ioutil.ReadAll(f)
+	if err != nil {
+		return content, err
+	}
+	return content, err
+}
+
+func (c *projectTool)writeToFile(filePath string, outPut []byte) error {
+	f, err := os.OpenFile(filePath, os.O_WRONLY|os.O_TRUNC, 0600)
+	defer f.Close()
 	if err != nil {
 		return err
 	}
-	newBody := strings.Replace(string(body), "rgo-template", c.name, -1)
-	_, err = io.WriteString(f, newBody)
+	writer := bufio.NewWriter(f)
+	_, err = writer.Write(outPut)
 	if err != nil {
 		return err
 	}
-	return err
+	writer.Flush()
+	return nil
 }
