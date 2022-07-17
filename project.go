@@ -62,7 +62,7 @@ func (c *projectTool)clone() (err error){
 }
 
 func (c *projectTool)cleanTemplate() (err error){
-	command2 := exec.Command("rm", "-rf", c.pwd + "/rgo-template")
+	command2 := exec.Command("rm", "-rf", c.pwd + "rgo-template")
 	command2.Dir = c.pwd
 	err = command2.Run()
 	if err != nil {
@@ -78,7 +78,7 @@ func (c *projectTool)cleanTemplate() (err error){
 // @Author  : LiJunDong
 // @Time    : 2022-06-11
 func (cfg *config) mv() (err error) {
-	from := cfg.pwd + "/rgo-template"
+	from := cfg.pwd + "rgo-template"
 	to := cfg.pwd
 	if cfg.sysType == "windows" {
 		from = "\\util\\rgtemplate\\code"
@@ -93,7 +93,7 @@ func (cfg *config) mv() (err error) {
 // <LiJunDong : 2022-06-12 00:18:32> --- 移动的时候需要将文件后缀tmp去掉 将文件内容中项目名替换
 func copy(project, from, to string) error {
 	fmt.Println("from:", from, strings.Index(from, ".git/"))
-	if strings.Index(from, ".git/") != 0 {
+	if strings.Index(from, ".git/") != -1 {
 		return nil
 	}
 	f, e := os.Stat(from)
