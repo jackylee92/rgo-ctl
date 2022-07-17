@@ -90,7 +90,7 @@ OuterLoop:
 				continue OuterLoop
 			}
 		}
-		return errors.New(cfg.pwd + "不为空" + item)
+		return errors.New(cfg.pwd + "不为空:" + item)
 	}
 	return err
 }

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bufio"
 	"errors"
 	"fmt"
 	"io/ioutil"
@@ -33,11 +32,11 @@ func (c *projectTool)create() (err error) {
 		return err
 	}
 	fmt.Println("clone成功...")
-	if err = c.replaceName(c.pwd); err != nil {
+	if err = c.mv(); err != nil {
 		log.Println("err", err)
 		return err
 	}
-	fmt.Println("初始化成功...")
+	c.cleanTemplate()
 	return err
 }
 
@@ -52,15 +51,7 @@ func (c *projectTool)check()(err error){
 }
 
 func (c *projectTool)clone() (err error){
-	command1 := exec.Command("rm", "-rf", c.pwd + ".*")
-	command1.Dir = c.pwd
-	err = command1.Run()
-	if err != nil {
-		return err
-	}
-	command1.Wait()
-
-	command2 := exec.Command("git", "clone", rgoTemplateUrl, c.pwd)
+	command2 := exec.Command("git", "clone", rgoTemplateUrl)
 	command2.Dir = c.pwd
 	err = command2.Run()
 	if err != nil {
@@ -70,68 +61,79 @@ func (c *projectTool)clone() (err error){
 	return err
 }
 
-func (c *projectTool)replaceName(path string) (err error) {
-	f, err := os.Stat(path)
+func (c *projectTool)cleanTemplate() (err error){
+	command2 := exec.Command("rm", "-rf", c.pwd + "/rgo-template")
+	command2.Dir = c.pwd
+	err = command2.Run()
 	if err != nil {
-		return err
+		return errors.New("git clone失败：" + err.Error())
+	}
+	command2.Wait()
+	return err
+}
+
+// mv
+// @Param   :
+// @Return  :
+// @Author  : LiJunDong
+// @Time    : 2022-06-11
+func (cfg *config) mv() (err error) {
+	from := cfg.pwd + "/rgo-template"
+	to := cfg.pwd
+	if cfg.sysType == "windows" {
+		from = "\\util\\rgtemplate\\code"
+	}
+	err = copy(cfg.projectName, from, to)
+	if err != nil {
+		return errors.New("移动模版文件失败，" + err.Error())
+	}
+	return err
+}
+
+// <LiJunDong : 2022-06-12 00:18:32> --- 移动的时候需要将文件后缀tmp去掉 将文件内容中项目名替换
+func copy(project, from, to string) error {
+	f, e := os.Stat(from)
+	if e != nil {
+		return e
 	}
 	if f.IsDir() {
-		if list, err := ioutil.ReadDir(path); err == nil {
+		//from是文件夹，那么定义to也是文件夹
+		if list, e := ioutil.ReadDir(from); e == nil {
 			for _, item := range list {
-				name := item.Name()
-				if strings.Index(name, ".") == 0 {
-					continue
-				}
-				if err = c.replaceName(filepath.Join(path, name)); err != nil {
-					return err
+				if e = copy(project, filepath.Join(from, item.Name()), filepath.Join(to, item.Name())); e != nil {
+					return e
 				}
 			}
 		}
 	} else {
-		err = c.replaceFile(path)
-		if err != nil {
-			return err
+		//from是文件，那么创建to的文件夹
+		p := filepath.Dir(to)
+		if _, e = os.Stat(p); e != nil {
+			if e = os.MkdirAll(p, 0777); e != nil {
+				return e
+			}
 		}
+		//读取源文件
+		file, e := os.Open(from)
+		if e != nil {
+			return e
+		}
+		defer file.Close()
+		fileContent, e := ioutil.ReadAll(file)
+		if e != nil {
+			return e
+		}
+		newFileContent := strings.Replace(string(fileContent), "rgo-template", project, -1)
+		// 创建一个文件用于保存
+		if strings.ToLower(to[len(to)-4:]) == ".tmp" {
+			to = to[:len(to)-4]
+		}
+		out, e := os.Create(to)
+		if e != nil {
+			return e
+		}
+		defer out.Close()
+		_, e = out.WriteString(newFileContent)
 	}
-	return err
-}
-
-
-func (c *projectTool)replaceFile(fileName string)(err error){
-	content, err := getNewFile(fileName, c.projectName)
-	if err != nil {
-		return err
-	}
-	fmt.Println("content", string(content))
-	err = writeToFile(fileName, content)
-	return err
-}
-func getNewFile(fileName string, replaceName string) (content []byte, err error) {
-	fmt.Println("getNewFile", fileName, replaceName)
-	f, err := os.OpenFile(fileName, os.O_CREATE|os.O_RDWR, os.ModePerm)
-	if err != nil {
-		return content, err
-	}
-	defer f.Close()
-	content, err = ioutil.ReadAll(f)
-	if err != nil {
-		return content, err
-	}
-	newBody := strings.Replace(string(content), "rgo-template", replaceName, -1)
-	return []byte(newBody), err
-}
-
-func writeToFile(filePath string, outPut []byte) error {
-	f, err := os.OpenFile(filePath, os.O_WRONLY|os.O_TRUNC, 0600)
-	defer f.Close()
-	if err != nil {
-		return err
-	}
-	writer := bufio.NewWriter(f)
-	_, err = writer.Write(outPut)
-	if err != nil {
-		return err
-	}
-	writer.Flush()
-	return nil
+	return e
 }
