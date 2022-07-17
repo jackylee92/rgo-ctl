@@ -96,6 +96,7 @@ func copy(project, from, to string) error {
 	if e != nil {
 		return e
 	}
+	fmt.Println("from",from)
 	if strings.Index(from, ".gitignore") == 0 && strings.Index(from, ".git") != 0 {
 		return nil
 	}
