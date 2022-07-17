@@ -23,12 +23,11 @@ var allowFiles = []string{
 }
 
 func main() {
-	 err := start()
-	if err != nil {
+	if err := start(); err != nil {
 		fmt.Fprintln(os.Stderr, err.Error())
 		os.Exit(1)
 	}
-	fmt.Println("初始化结束：", err)
+	fmt.Println("OVER...")
 }
 
 func start() (err error) {
@@ -39,13 +38,13 @@ func start() (err error) {
 		}
 		return err
 	}
-	if err := cfg.checkEnv(); err != nil {
+	if err = cfg.checkEnv(); err != nil {
 		return err
 	}
-	if err := cfg.switchDo(); err != nil {
+	if err = cfg.switchDo(); err != nil {
 		return err
 	}
-	cfg.outMessage()
+	cfg.outMessage(err)
 	return err
 }
 
@@ -97,10 +96,14 @@ func (cfg *config) switchDo() (err error) {
 	return err
 }
 
-func (cfg *config) outMessage() {
-	fmt.Println("项目创建中: ")
+func (cfg *config) outMessage(err error) {
+	if err != nil {
+		fmt.Println("项目创建失败: " + err.Error())
+	}else{
+		fmt.Println("项目创建成功: ")
+	}
 	fmt.Println("    系统:" + cfg.sysType)
 	fmt.Println("    go 版本:" + cfg.version)
 	fmt.Println("    go Mod:" + cfg.module)
-	fmt.Println("    项目名:" + cfg.name)
+	fmt.Println("    项目名:" + cfg.projectName)
 }

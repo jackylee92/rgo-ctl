@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -33,7 +32,6 @@ func (c *projectTool)create() (err error) {
 	}
 	fmt.Println("clone成功...")
 	if err = c.mv(); err != nil {
-		log.Println("err", err)
 		return err
 	}
 	c.cleanTemplate()
@@ -80,9 +78,6 @@ func (c *projectTool)cleanTemplate() (err error){
 func (cfg *config) mv() (err error) {
 	from := cfg.pwd + "rgo-template"
 	to := cfg.pwd
-	if cfg.sysType == "windows" {
-		from = "\\util\\rgtemplate\\code"
-	}
 	err = copy(cfg.projectName, from, to)
 	if err != nil {
 		return errors.New("移动模版文件失败，" + err.Error())
@@ -92,7 +87,6 @@ func (cfg *config) mv() (err error) {
 
 // <LiJunDong : 2022-06-12 00:18:32> --- 移动的时候需要将文件后缀tmp去掉 将文件内容中项目名替换
 func copy(project, from, to string) error {
-	fmt.Println("from:", from, strings.Index(from, ".git/"))
 	if strings.Index(from, ".git/") != -1 {
 		return nil
 	}
