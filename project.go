@@ -98,7 +98,7 @@ func (c *projectTool)replaceName(path string) (err error) {
 
 
 func (c *projectTool)replaceFile(fileName string)(err error){
-	content, err := getNewFile(fileName, c.name)
+	content, err := getNewFile(fileName, c.projectName)
 	if err != nil {
 		return err
 	}
