@@ -96,6 +96,9 @@ func copy(project, from, to string) error {
 	if e != nil {
 		return e
 	}
+	if strings.Index(from, ".gitignore") == 0 && strings.Index(from, ".git") != 0 {
+		return nil
+	}
 	if f.IsDir() {
 		//from是文件夹，那么定义to也是文件夹
 		if list, e := ioutil.ReadDir(from); e == nil {
@@ -124,10 +127,6 @@ func copy(project, from, to string) error {
 			return e
 		}
 		newFileContent := strings.Replace(string(fileContent), "rgo-template", project, -1)
-		// 创建一个文件用于保存
-		if strings.ToLower(to[len(to)-4:]) == ".tmp" {
-			to = to[:len(to)-4]
-		}
 		out, e := os.Create(to)
 		if e != nil {
 			return e
