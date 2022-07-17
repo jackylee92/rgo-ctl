@@ -92,6 +92,9 @@ func (cfg *config) mv() (err error) {
 
 // <LiJunDong : 2022-06-12 00:18:32> --- 移动的时候需要将文件后缀tmp去掉 将文件内容中项目名替换
 func copy(project, from, to string) error {
+	if strings.Index(from, ".git/") != 0 {
+		return nil
+	}
 	f, e := os.Stat(from)
 	if e != nil {
 		return e
