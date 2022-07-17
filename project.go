@@ -98,14 +98,16 @@ func (c *projectTool)replaceName(path string) (err error) {
 
 
 func (c *projectTool)replaceFile(fileName string)(err error){
-	content, err := c.getNewFile(fileName)
+	content, err := getNewFile(fileName, c.name)
 	if err != nil {
 		return err
 	}
-	err = c.writeToFile(fileName, content)
+	fmt.Println("content", string(content))
+	err = writeToFile(fileName, content)
 	return err
 }
-func (c *projectTool)getNewFile(fileName string) (content []byte, err error) {
+func getNewFile(fileName string, replaceName string) (content []byte, err error) {
+	fmt.Println("getNewFile", fileName, replaceName)
 	f, err := os.OpenFile(fileName, os.O_CREATE|os.O_RDWR, os.ModePerm)
 	if err != nil {
 		return content, err
@@ -115,11 +117,11 @@ func (c *projectTool)getNewFile(fileName string) (content []byte, err error) {
 	if err != nil {
 		return content, err
 	}
-	newBody := strings.Replace(string(content), "rgo-template", c.name, -1)
+	newBody := strings.Replace(string(content), "rgo-template", replaceName, -1)
 	return []byte(newBody), err
 }
 
-func (c *projectTool)writeToFile(filePath string, outPut []byte) error {
+func writeToFile(filePath string, outPut []byte) error {
 	f, err := os.OpenFile(filePath, os.O_WRONLY|os.O_TRUNC, 0600)
 	defer f.Close()
 	if err != nil {
