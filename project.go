@@ -62,6 +62,14 @@ func (c *projectTool)clone() (err error){
 }
 
 func (c *projectTool)cleanTemplate() (err error){
+	command1 := exec.Command("rm", "-rf", c.pwd + "/.git")
+	command1.Dir = c.pwd
+	err = command1.Run()
+	if err != nil {
+		return errors.New("git clone失败：" + err.Error())
+	}
+	command1.Wait()
+
 	command2 := exec.Command("rm", "-rf", c.pwd + "/rgo-template")
 	command2.Dir = c.pwd
 	err = command2.Run()
@@ -95,10 +103,6 @@ func copy(project, from, to string) error {
 	f, e := os.Stat(from)
 	if e != nil {
 		return e
-	}
-	fmt.Println("from",from)
-	if strings.Index(from, ".gitignore") == 0 && strings.Index(from, ".git") != 0 {
-		return nil
 	}
 	if f.IsDir() {
 		//from是文件夹，那么定义to也是文件夹
