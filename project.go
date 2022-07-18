@@ -35,6 +35,7 @@ func (c *projectTool)create() (err error) {
 		return err
 	}
 	c.cleanTemplate()
+	c.goMod()
 	return err
 }
 
@@ -61,6 +62,17 @@ func (c *projectTool)clone() (err error){
 
 func (c *projectTool)cleanTemplate() (err error){
 	command2 := exec.Command("rm", "-rf", c.pwd + "rgo-template")
+	command2.Dir = c.pwd
+	err = command2.Run()
+	if err != nil {
+		return errors.New("git clone失败：" + err.Error())
+	}
+	command2.Wait()
+	return err
+}
+
+func (c *projectTool)goMod() (err error){
+	command2 := exec.Command("go", "mod", c.pwd + "download")
 	command2.Dir = c.pwd
 	err = command2.Run()
 	if err != nil {
