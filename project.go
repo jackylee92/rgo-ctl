@@ -72,11 +72,19 @@ func (c *projectTool)cleanTemplate() (err error){
 }
 
 func (c *projectTool)goMod() (err error){
-	command2 := exec.Command("go", "mod", c.pwd + "download")
+	command1 := exec.Command("go", "mod", "tidy")
+	command1.Dir = c.pwd
+	err = command1.Run()
+	if err != nil {
+		return errors.New("go mod tidy失败：" + err.Error())
+	}
+	command1.Wait()
+
+	command2 := exec.Command("go", "mod", "download")
 	command2.Dir = c.pwd
 	err = command2.Run()
 	if err != nil {
-		return errors.New("git clone失败：" + err.Error())
+		return errors.New("go mod download失败：" + err.Error())
 	}
 	command2.Wait()
 	return err
