@@ -33,10 +33,10 @@ func (cfg *config) checkEnv() (err error) {
 	vArr := strings.Split(vNum, ".")
 	for index, item := range vArr {
 		if index == 0 && item < "1" {
-			return errors.New("go版本过低，最低要求1.16")
+			return errors.New("go版本过低，最低要求1.16，当前|" + cfg.version)
 		}
 		if index == 1 && item < "16" {
-			return errors.New("go版本过低，最低要求1.16")
+			return errors.New("go版本过低，最低要求1.16，当前|" + cfg.version)
 		}
 	}
 	//  <LiJunDong : 2022-06-11 15:57:19> --- go module
@@ -50,7 +50,7 @@ func (cfg *config) checkEnv() (err error) {
 	cfg.module = gomod
 	gomod = strings.ToLower(gomod)
 	if gomod != "auto" && gomod != "on" {
-		return errors.New("go环境未开启go mod，需要auto/on")
+		return errors.New("go环境未开启go mod，需要auto/on，当前:"+gomod)
 	}
 	return err
 }
